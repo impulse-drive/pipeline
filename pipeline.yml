@@ -1,0 +1,36 @@
+---
+apiVersion: v1
+kind: Pod
+metadata:
+    name: pipeline.impulse-drive
+spec:
+    containers:
+        - name: pipeline-master
+          image: aerkenemesis/resource-git:latest
+          imagePullPolicy: Always
+          env:
+            - name: POLL_TIMEOUT
+              value: "3000"
+            - name: URL
+              value: "https://github.com/impulse-drive/pipeline.git"
+            - name: REF
+              value: "master"
+            - name: NAME
+              value: "pipeline.impulse-drive.resource.pipeline-master"
+            - name: STORAGE_URL
+              value: "http://storage.default.svc.cluster.local"
+            - name: QUEUE_URL
+              value: "nats-client.default.svc.cluster.local:4222"
+        - name: job1
+          image: aerkenemesis/job-scheduler:latest
+          imagePullPolicy: Always
+          env:
+            - name: NAME
+              value: "pipeline.impulse-drive.job-scheduler.job1"
+            - name: QUEUE_URL
+              value: "nats-client.default.svc.cluster.local:4222"
+            - name: STORAGE_URL
+              value: "http://storage.default.svc.cluster.local"
+            - name: RESOURCES
+              value: "pipeline.impulse-drive.resource.pipeline-master"
+
