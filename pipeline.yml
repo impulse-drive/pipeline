@@ -10,7 +10,7 @@ data:
           "apiVersion": "batch/v1",
           "kind": "Job",
           "metadata": {
-              "name": "task-00"
+              "name": "pipeline.impulse-drive.job-scheduler.job1.task.task-00"
           },
           "spec": {
               "template": {
@@ -34,6 +34,7 @@ kind: Pod
 metadata:
     name: pipeline.impulse-drive
 spec:
+    serviceAccountName: internal-kubectl
     containers:
         - name: pipeline-master
           image: aerkenemesis/resource-git:latest
