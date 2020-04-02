@@ -5,29 +5,15 @@ metadata:
   name: job1-tasks
   namespace: default
 data:
-  task-00.json: |
-      {
-          "apiVersion": "batch/v1",
-          "kind": "Job",
-          "metadata": {
-              "name": "pipeline.impulse-drive.job-scheduler.job1.task.task-00"
-          },
-          "spec": {
-              "template": {
-                  "spec": {
-                      "containers": [
-                          {
-                              "name": "task-00",
-                              "image": "alpine",
-                              "command": ["echo", "hello", "world"]
-                          }
-                      ],
-                      "restartPolicy": "Never"
-                  }
-              },
-              "backoffLimit": 1
-          }
-      }
+    tasks.json: |
+        [
+            {
+                "name": "task1",
+                "image": "busybox",
+                "command": "echo",
+                "args": [ "hello", "world" ]
+            }
+        ]
 ---
 apiVersion: v1
 kind: Pod
@@ -65,7 +51,7 @@ spec:
             - name: RESOURCES
               value: "pipeline.impulse-drive.resource.pipeline-master"
             - name: TASK_PATH
-              value: "/etc/config/tasks"
+              value: "/etc/config/tasks/tasks.json"
           volumeMounts:
             - name: job1-tasks
               mountPath: /etc/config/tasks
