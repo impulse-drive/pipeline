@@ -9,9 +9,9 @@ data:
         [
             {
                 "name": "task1",
-                "image": "busybox",
-                "command": "echo",
-                "args": [ "hello", "world" ]
+                "image": "bitnami/kubectl",
+                "command": "get",
+                "args": [ "pods" ]
             }
         ]
 ---
@@ -20,38 +20,58 @@ kind: Pod
 metadata:
     name: pipeline.impulse-drive
 spec:
-    serviceAccountName: internal-kubectl
+    restartPolicy: Always
     containers:
         - name: pipeline-master
           image: aerkenemesis/resource-git:latest
           imagePullPolicy: Always
           env:
             - name: POLL_TIMEOUT
-              value: "3000"
+              value: "3"
             - name: URL
               value: "https://github.com/impulse-drive/pipeline.git"
             - name: REF
               value: "master"
             - name: NAME
               value: "pipeline.impulse-drive.resource.pipeline-master"
-            - name: STORAGE_URL
-              value: "http://storage.default.svc.cluster.local"
-            - name: QUEUE_URL
-              value: "nats-client.default.svc.cluster.local:4222"
+            - name: MINIO_ACCESS_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: impulse-drive-minio
+                  key: access-key
+            - name: MINIO_SECRET_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: impulse-drive-minio
+                  key: secret-key
+          envFrom:
+            - configMapRef:
+                name: impulse-drive-services
+            - configMapRef:
+                name: impulse-drive-storage
         - name: job1
           image: aerkenemesis/job-scheduler:latest
           imagePullPolicy: Always
           env:
             - name: NAME
               value: "pipeline.impulse-drive.job-scheduler.job1"
-            - name: QUEUE_URL
-              value: "nats-client.default.svc.cluster.local:4222"
-            - name: STORAGE_URL
-              value: "http://storage.default.svc.cluster.local"
             - name: RESOURCES
               value: "pipeline.impulse-drive.resource.pipeline-master"
             - name: TASK_PATH
               value: "/etc/config/tasks/tasks.json"
+            - name: MINIO_ACCESS_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: impulse-drive-minio
+                  key: access-key
+            - name: MINIO_SECRET_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: impulse-drive-minio
+                  key: secret-key
+          envFrom:
+            - configMapRef:
+                name: impulse-drive-services
           volumeMounts:
             - name: job1-tasks
               mountPath: /etc/config/tasks
